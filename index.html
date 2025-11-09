@@ -3,170 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ડિજિટલ ગુજરાતી ઘડિયાળ</title>
+    <title>ગુજરાતી ડિજિટલ ઘડિયાળ - ચોઘડિયાં સાથે</title>
     <style>
-        /* CSS: ઘડિયાળનો દેખાવ */
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 50px;
-            background-color: #282c34;
-            color: #61dafb;
-        }
-        #clock-display {
-            font-size: 3em;
-            margin-bottom: 5px;
-            color: #ffffff;
-        }
-        #ampm-time {
-            font-size: 1.5em;
-            color: #ffffff;
-            margin-bottom: 20px;
-        }
-        #gujarati-details {
-            font-size: 1.5em;
-            color: #b3ffb3;
-            border: 2px solid #61dafb;
-            padding: 15px;
-            display: inline-block;
-            border-radius: 10px;
-            margin-top: 10px;
-            line-height: 1.5;
-        }
-        #slogan {
-            font-size: 1em;
-            margin-top: 30px;
-            color: #ccc;
-        }
-        .detail-line {
-            display: block;
-            font-weight: bold;
-        }
-        .birthday-text {
-            color: #ffcc00;
-            font-size: 1.1em;
-            font-weight: 900;
-        }
+        body { font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; color: #333; padding: 20px; }
+        .clock-container { background-color: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 500px; margin: 50px auto; }
+        #time { font-size: 4em; font-weight: bold; margin-bottom: 10px; color: #007bff; }
+        #date-details { font-size: 1.2em; margin-bottom: 20px; }
+        #choghadiya { font-size: 1.5em; font-weight: 600; padding: 10px; border: 2px solid #28a745; border-radius: 8px; background-color: #e6ffed; color: #28a745; }
+        .panchang-placeholder { margin-top: 20px; color: #6c757d; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <div id="clock-display">00:00:00</div>
-    <div id="ampm-time">AM</div>
-    <div id="gujarati-details">વાર, તિથિ, ચોઘડિયાં અને મહિનો અહીં દેખાશે.</div>
-    <div id="slogan">Live in the present.</div>
+    <div class="clock-container">
+        <div id="time"></div>
+        <div id="date-details"></div>
+        <div id="choghadiya">ચોઘડિયું લોડ થાય છે...</div>
+        
+        <div class="panchang-placeholder">
+            **નોંધ:** ગુજરાતી મહિનો, તિથિ, અને તહેવારોનો ડેટા સેટ બાકી છે.
+        </div>
+    </div>
 
     <script>
-        /* JavaScript: સંપૂર્ણ ઘડિયાળ અને ગુજરાતી વિગતો અપડેટ કરવાનો કોડ (API વગર) */
+        // ૧. સૂર્યોદય અને સૂર્યાસ્તનો તમારો ૭ દિવસનો ડેટા સેટ (DD-MM-YYYY ફોર્મેટમાં કી)
+        // આ ડેટાને હવે પૂર્ણ ૨૦૮૨ સંવત માટે અપડેટ કરવાનો રહેશે.
+        const sunriseSunsetData = {
+            "09-11-2025": { sunrise: "06:45", sunset: "18:00" },
+            "10-11-2025": { sunrise: "06:45", sunset: "18:00" },
+            "11-11-2025": { sunrise: "06:46", sunset: "17:59" },
+            "12-11-2025": { sunrise: "06:46", sunset: "17:59" },
+            "13-11-2025": { sunrise: "06:47", sunset: "17:59" },
+            "14-11-2025": { sunrise: "06:47", sunset: "17:59" },
+            "15-11-2025": { sunrise: "06:48", sunset: "17:58" }
+            // બાકીના દિવસો માટે, આમાં ઉમેરતા જવું.
+        };
 
-        // **તમારી જન્મતારીખ (૨૩ સપ્ટેમ્બર)**
-        const USER_BIRTHDAY_DAY = 23; 
-        const USER_BIRTHDAY_MONTH = 8; // સપ્ટેમ્બર (JavaScript માં 0=જાન્યુઆરી, 8=સપ્ટેમ્બર)
+        // ૨. પ્રમાણભૂત ચોઘડિયાંનો ક્રમ (વારના ક્રમ મુજબ 0=રવિવાર, 1=સોમવાર, વગેરે)
+        const choghadiyaOrder = {
+            // રવિવાર: 0
+            0: { day: ["ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ", "શુભ", "રોગ", "ઉદ્વેગ"], night: ["શુભ", "અમૃત", "ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "શુભ"] },
+            // સોમવાર: 1
+            1: { day: ["અમૃત", "કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત"], night: ["ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "શુભ"] },
+            // મંગળવાર: 2
+            2: { day: ["રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ", "શુભ", "રોગ"], night: ["કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ"] },
+            // બુધવાર: 3
+            3: { day: ["લાભ", "અમૃત", "કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ"], night: ["લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "રોગ", "કાળ", "શુભ", "લાભ"] },
+            // ગુરુવાર: 4
+            4: { day: ["શુભ", "અમૃત", "ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "શુભ"], night: ["અમૃત", "ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "શુભ", "અમૃત"] },
+            // શુક્રવાર: 5
+            5: { day: ["ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "શુભ"], night: ["રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "અમૃત", "શુભ", "ચલ", "રોગ"] },
+            // શનિવાર: 6
+            6: { day: ["કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ"], night: ["શુભ", "લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "રોગ", "કાળ", "શુભ"] }
+        };
 
-        // ચોઘડિયાંની સરળ ગણતરી (સાચી જ્યોતિષ ગણતરી નથી, પણ બદલાશે)
-        function getChoghadiya(now) {
-            const dayOfWeek = now.getDay(); 
-            const currentHour = now.getHours(); 
+        // ગુજરાતી વારના નામ
+        const dayNames = ["રવિવાર", "સોમવાર", "મંગળવાર", "બુધવાર", "ગુરુવાર", "શુક્રવાર", "શનિવાર"];
+
+        function getChoghadiya(currentDate) {
+            const dateStr = `${String(currentDate.getDate()).padStart(2, '0')}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${currentDate.getFullYear()}`;
             
-            const choghadiyaOrder = [
-                "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ", "શુભ", "રોગ", "ઉદ્વેગ" 
-            ];
-            
-            const startOffset = [0, 4, 2, 5, 3, 6, 1][dayOfWeek];
-            
-            let choghadiyaIndex;
-            
-            if (currentHour >= 6 && currentHour < 9) {
-                 choghadiyaIndex = 0; 
-            } else if (currentHour >= 9 && currentHour < 12) {
-                 choghadiyaIndex = 1; 
-            } else if (currentHour >= 12 && currentHour < 15) {
-                 choghadiyaIndex = 2; 
-            } else if (currentHour >= 15 && currentHour < 18) {
-                 choghadiyaIndex = 3; 
-            } else {
-                 return "કાળ/લાભ"; 
+            // ૧. તારીખ પ્રમાણે સૂર્યોદય/સૂર્યાસ્તનો સમય મેળવવો
+            const data = sunriseSunsetData[dateStr];
+
+            if (!data) {
+                // જો ડેટા ઉપલબ્ધ ન હોય તો.
+                return `ચોઘડિયાંનો ડેટા (તા: ${dateStr}) ઉપલબ્ધ નથી.`;
             }
-            
-            const finalIndex = (choghadiyaIndex + startOffset) % 8; 
 
-            return choghadiyaOrder[finalIndex];
+            const now = currentDate.getTime();
+            
+            // સમયને મિલિસેકન્ડ્સમાં કન્વર્ટ કરવો
+            const dateOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()).getTime();
+            const sunriseTime = dateOnly + convertTimeToMs(data.sunrise); // આજનો સૂર્યોદય
+            const sunsetTime = dateOnly + convertTimeToMs(data.sunset);   // આજનો સૂર્યાસ્ત
+            
+            // બીજા દિવસનો સૂર્યોદય મેળવવો (રાતના ચોઘડિયાં માટે)
+            const nextDay = new Date(currentDate);
+            nextDay.setDate(currentDate.getDate() + 1);
+            const nextDateStr = `${String(nextDay.getDate()).padStart(2, '0')}-${String(nextDay.getMonth() + 1).padStart(2, '0')}-${nextDay.getFullYear()}`;
+            const nextSunriseData = sunriseSunsetData[nextDateStr];
+            
+            if (!nextSunriseData) {
+                 // જો આવતીકાલનો ડેટા ઉપલબ્ધ ન હોય તો, ગણતરી અટકાવવી
+                 return `રાતના ચોઘડિયાં માટે આવતીકાલનો ડેટા (${nextDateStr}) ઉપલબ્ધ નથી.`;
+            }
+
+            const nextDayOnly = new Date(nextDay.getFullYear(), nextDay.getMonth(), nextDay.getDate()).getTime();
+            const nextSunriseTime = nextDayOnly + convertTimeToMs(nextSunriseData.sunrise); // આવતીકાલનો સૂર્યોદય
+            
+            const dayOfWeek = currentDate.getDay(); // 0 (રવિવાર) થી 6 (શનિવાર)
+
+            let choghadiyaType, choghadiyaList, durationMs;
+
+            if (now >= sunriseTime && now < sunsetTime) {
+                // દિવસના ચોઘડિયાં (સૂર્યોદય થી સૂર્યાસ્ત)
+                choghadiyaType = "દિવસનું";
+                choghadiyaList = choghadiyaOrder[dayOfWeek].day;
+                durationMs = (sunsetTime - sunriseTime) / 8; // દિવસના ૮ ભાગ
+                
+                // કયું ચોઘડિયું ચાલે છે તે નક્કી કરવું
+                const timeElapsed = now - sunriseTime;
+                const choghadiyaIndex = Math.floor(timeElapsed / durationMs);
+                return `${choghadiyaType} ચોઘડિયું: **${choghadiyaList[choghadiyaIndex]}**`;
+
+            } else {
+                // રાતના ચોઘડિયાં (સૂર્યાસ્ત થી બીજા દિવસના સૂર્યોદય)
+                choghadiyaType = "રાતનું";
+                // રાતના ચોઘડિયાં માટે વાર 'આવતીકાલનો' ગણાય છે
+                const nightDayOfWeek = (dayOfWeek + 1) % 7; 
+                choghadiyaList = choghadiyaOrder[nightDayOfWeek].night;
+                durationMs = (nextSunriseTime - sunsetTime) / 8; // રાતના ૮ ભાગ
+                
+                // કયું ચોઘડિયું ચાલે છે તે નક્કી કરવું
+                const timeElapsed = now - sunsetTime;
+                let choghadiyaIndex = Math.floor(timeElapsed / durationMs);
+
+                // જો સમય સૂર્યાસ્ત પહેલાનો હોય (રાત્રી ૧૨:૦૦ થી સૂર્યોદય વચ્ચે)
+                if (now < sunriseTime) {
+                    // ગણતરી પાછલા દિવસના સૂર્યાસ્તથી શરૂ કરવી પડે. (જટિલતા ટાળવા અહીં ફક્ત સરળ લોજિક રાખેલ છે)
+                    // આ કિસ્સો ૦૦:૦૦ થી સૂર્યોદય વચ્ચેનો છે.
+                    // આ સમયગાળો પાછલા દિવસના રાતના ચોઘડિયાંના અંતિમ ભાગોમાં આવે છે.
+                    
+                    // અહીં આપણે લોજિકને સરળ બનાવવા માટે ધારીએ છીએ કે યુઝર ડેટા આપે ત્યાં સુધી માત્ર દિવસ અને રાત જ કવર કરવા
+                    
+                    if (choghadiyaIndex < 0) {
+                        // જો સમય ૦૦:૦૦ અને સૂર્યોદયની વચ્ચે હોય
+                        const previousDay = new Date(currentDate);
+                        previousDay.setDate(currentDate.getDate() - 1);
+                        const previousDateStr = `${String(previousDay.getDate()).padStart(2, '0')}-${String(previousDay.getMonth() + 1).padStart(2, '0')}-${previousDay.getFullYear()}`;
+                        
+                        // પાછલા દિવસના ડેટાની જરૂર પડશે...
+                        // હાલ પૂરતી સરળતા માટે, જો ડેટા નથી, તો ભૂલ બતાવવી.
+                        return "રાતના ચોઘડિયાં (સૂર્યોદય પહેલાનો સમય) ગણવા માટે પાછલા દિવસના સૂર્યાસ્ત ડેટાની જરૂર છે.";
+                    }
+                }
+                
+                return `${choghadiyaType} ચોઘડિયું: **${choghadiyaList[choghadiyaIndex]}**`;
+            }
         }
 
-
-        // તિથિ, મહિનો અને તહેવારની વિગતો (સરળ પ્લેસહોલ્ડર)
-        function getGujaratiDetails(date) {
-            const day = date.getDate();
-            const month = date.getMonth(); 
-            
-            // વારનું નામ
-            const days = ['રવિવાર', 'સોમવાર', 'મંગળવાર', 'બુધવાર', 'ગુરુવાર', 'શુક્રવાર', 'શનિવાર'];
-            const dayName = days[date.getDay()];
-            
-            // ગુજરાતી મહિનાનું નામ (પ્રાથમિક, ગ્રેગોરિયન મહિના પર આધારિત)
-            const gujaratiMonths = [
-                "કાર્તક", "માગશર", "પોષ", "મહા", "ફાગણ", "ચૈત્ર", 
-                "વૈશાખ", "જેઠ", "અષાઢ", "શ્રાવણ", "ભાદરવો", "આસો"
-            ];
-            
-            // તિથિ (સરળ ગણતરી)
-            const tithis = [
-                "પડવો", "બીજ", "તરીજ", "ચોથ", "પાંચમ", "છઠ", "સાતમ", "આઠમ", 
-                "નોમ", "દશમ", "અગિયારસ", "બારસ", "તેરસ", "ચૌદસ", "પૂનમ/અમાસ"
-            ];
-            const simpleTithiIndex = (day - 1) % tithis.length;
-
-            const dateDetails = `${day}/${month + 1}/${date.getFullYear()}`;
-            const gujMonth = gujaratiMonths[month];
-            const tithi = tithis[simpleTithiIndex];
-
-            const choghadiya = getChoghadiya(date); 
-            
-            // જન્મદિવસની તપાસ
-            let festival;
-            if (day === USER_BIRTHDAY_DAY && month === USER_BIRTHDAY_MONTH) {
-                festival = `<span class="birthday-text">જન્મદિવસ મુબારક! 🎉</span>`;
-            } else {
-                festival = "કોઈ તહેવાર/પ્રસંગ નહીં"; 
-            }
-            
-            // HTML ફોર્મેટમાં વિગતો પરત કરો
-            return `
-                <span class="detail-line">🗓️ વાર: **${dayName}** | તારીખ: **${dateDetails}**</span>
-                <span class="detail-line">✨ તિથિ: **${tithi}** | મહિનો: **${gujMonth}**</span>
-                <span class="detail-line">🔔 ચોઘડિયું: **${choghadiya}** | પ્રસંગ: **${festival}**</span>
-            `;
+        // HH:MM સ્ટ્રિંગને મિલિસેકન્ડ્સમાં કન્વર્ટ કરે છે
+        function convertTimeToMs(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            return (hours * 60 + minutes) * 60 * 1000;
         }
 
-
-        // મુખ્ય સમય અપડેટ ફંક્શન
-        function updateTime() {
+        // મુખ્ય ઘડિયાળ ફંક્શન
+        function updateClock() {
             const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let seconds = now.getSeconds();
-            
-            // 12-કલાકનું ફોર્મેટ (AM/PM સાથે)
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            
-            hours = hours < 10 ? '0' + hours : hours;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const day = now.getDay();
 
-            const timeString = `${hours}:${minutes}:${seconds}`;
-            document.getElementById('clock-display').textContent = timeString;
-            document.getElementById('ampm-time').textContent = ampm;
-
-            const gujaratiDetails = getGujaratiDetails(now);
-            document.getElementById('gujarati-details').innerHTML = gujaratiDetails;
+            // સમય: HH:MM:SS
+            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             
-            setTimeout(updateTime, 1000);
+            // તારીખ અને વાર
+            const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+            const detailsStr = `${dateStr}, ${dayNames[day]}`;
+
+            document.getElementById('time').textContent = timeStr;
+            document.getElementById('date-details').textContent = detailsStr;
+            
+            // ચોઘડિયાં અપડેટ કરવા
+            const choghadiyaStr = getChoghadiya(now);
+            document.getElementById('choghadiya').innerHTML = choghadiyaStr;
         }
 
-        // ઘડિયાળ શરૂ કરો
-        updateTime();
+        // દર સેકન્ડે ઘડિયાળ અપડેટ કરવી
+        setInterval(updateClock, 1000);
+        // પ્રથમ વખત તરત જ શરૂ કરવું
+        updateClock();
     </script>
 </body>
 </html>

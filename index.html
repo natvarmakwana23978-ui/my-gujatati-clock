@@ -1,45 +1,171 @@
-                const choghadiyaList = choghadiyaOrder[nightDayOfWeek].night;
-                
-                const durationMs = (nextSunriseTime - sunsetTime) / 8;
-                const timeElapsed = now - sunsetTime;
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ગુજરાતી ડિજિટલ ઘડિયાળ - ચોઘડિયાં સાથે</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; text-align: center; background-color: #f4f4f4; color: #333; padding: 20px; }
+        .clock-container { background-color: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 500px; margin: 50px auto; }
+        #time { font-size: 4em; font-weight: bold; margin-bottom: 10px; color: #007bff; }
+        #date-details { font-size: 1.2em; margin-bottom: 20px; }
+        /* હાલમાં સક્રિય ચોઘડિયું હાઇલાઇટ કરવા માટે */
+        #choghadiya { font-size: 1.5em; font-weight: 600; padding: 10px; border: 2px solid #28a745; border-radius: 8px; background-color: #e6ffed; color: #28a745; }
+        .panchang-placeholder { margin-top: 20px; color: #6c757d; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="clock-container">
+        <div id="time">**સમય લોડ થાય છે...**</div>
+        <div id="date-details">**તારીખ અને વાર લોડ થાય છે...**</div>
+        <div id="choghadiya">ચોઘડિયું લોડ થાય છે...</div>
+        
+        <div class="panchang-placeholder">
+            **નોંધ:** ગુજરાતી મહિનો, તિથિ, અને તહેવારોનો ડેટા સેટ બાકી છે.
+        </div>
+    </div>
+
+    <script>
+        // ૧. સૂર્યોદય અને સૂર્યાસ્તનો તમારો ૭ દિવસનો ડેટા સેટ (DD-MM-YYYY ફોર્મેટમાં કી)
+        // નોંધ: આ ડેટા માત્ર ટેસ્ટિંગ માટે છે. તમારો સંપૂર્ણ 2082 ડેટા અહીં મૂકવો.
+        const sunriseSunsetData = {
+            "08-11-2025": { sunrise: "06:44", sunset: "18:01" }, 
+            "09-11-2025": { sunrise: "06:45", sunset: "18:00" }, // આજ
+            "10-11-2025": { sunrise: "06:45", sunset: "18:00" }, 
+            "11-11-2025": { sunrise: "06:46", sunset: "17:59" },
+            "12-11-2025": { sunrise: "06:46", sunset: "17:59" },
+            "13-11-2025": { sunrise: "06:47", sunset: "17:59" },
+            "14-11-2025": { sunrise: "06:47", sunset: "17:59" },
+            "15-11-2025": { sunrise: "06:48", sunset: "17:58" }
+        };
+
+        // ૨. પ્રમાણભૂત ચોઘડિયાંનો ક્રમ (વારના ક્રમ મુજબ 0=રવિવાર, 1=સોમવાર, વગેરે)
+        const choghadiyaOrder = {
+            // રવિવાર: 0
+            0: { day: ["ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ", "શુભ", "રોગ", "ઉદ્વેગ"], night: ["શુભ", "અમૃત", "ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "શુભ"] },
+            // સોમવાર: 1
+            1: { day: ["અમૃત", "કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત"], night: ["ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "શુભ"] },
+            // મંગળવાર: 2
+            2: { day: ["રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ", "શુભ", "રોગ"], night: ["કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ"] },
+            // બુધવાર: 3
+            3: { day: ["લાભ", "અમૃત", "કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ"], night: ["લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "રોગ", "કાળ", "શુભ", "લાભ"] },
+            // ગુરુવાર: 4
+            4: { day: ["શુભ", "અમૃત", "ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "શુભ"], night: ["અમૃત", "ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "શુભ", "અમૃત"] },
+            // શુક્રવાર: 5
+            5: { day: ["ચલ", "રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "શુભ"], night: ["રોગ", "કાળ", "લાભ", "ઉદ્વેગ", "અમૃત", "શુભ", "ચલ", "રોગ"] },
+            // શનિવાર: 6
+            6: { day: ["કાળ", "શુભ", "રોગ", "ઉદ્વેગ", "ચલ", "લાભ", "અમૃત", "કાળ"], night: ["શુભ", "લાભ", "ઉદ્વેગ", "અમૃત", "ચલ", "રોગ", "કાળ", "શુભ"] }
+        };
+
+        const dayNames = ["રવિવાર", "સોમવાર", "મંગળવાર", "બુધવાર", "ગુરુવાર", "શુક્રવાર", "શનિવાર"];
+
+        // HH:MM સ્ટ્રિંગને મિલિસેકન્ડ્સમાં કન્વર્ટ કરે છે
+        function convertTimeToMs(time) {
+            if (!time) return 0;
+            const [hours, minutes] = time.split(':').map(Number);
+            return (hours * 60 + minutes) * 60 * 1000;
+        }
+
+        // તારીખને DD-MM-YYYY ફોર્મેટમાં ફેરવે છે
+        function formatDate(date) {
+            return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+        }
+
+        /**
+         * ચોક્કસ તારીખની આસપાસના સૂર્યોદય/સૂર્યાસ્તના ટાઇમસ્ટેમ્પ મિલિસેકન્ડ્સમાં મેળવે છે.
+         */
+        function getSunTimestamps(date) {
+            // મિલિસેકન્ડ્સમાં આજની તારીખ 00:00:00 (મધ્યરાત્રી)
+            const dateOnlyMs = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
+            // ગઈકાલ
+            const previousDay = new Date(date);
+            previousDay.setDate(date.getDate() - 1);
+            const previousData = sunriseSunsetData[formatDate(previousDay)];
+            // ગઈકાલનો સૂર્યાસ્ત: ગઈકાલની મધ્યરાત્રી + સૂર્યાસ્તનો સમય
+            const previousSunsetTime = previousData ? (dateOnlyMs - convertTimeToMs("24:00")) + convertTimeToMs(previousData.sunset) : null;
+            
+            // આજ
+            const currentData = sunriseSunsetData[formatDate(date)];
+            // આજનો સૂર્યોદય/સૂર્યાસ્ત: આજની મધ્યરાત્રી + સમય
+            const currentSunriseTime = currentData ? dateOnlyMs + convertTimeToMs(currentData.sunrise) : null;
+            const currentSunsetTime = currentData ? dateOnlyMs + convertTimeToMs(currentData.sunset) : null;
+
+            // આવતીકાલ
+            const nextDay = new Date(date);
+            nextDay.setDate(date.getDate() + 1);
+            const nextData = sunriseSunsetData[formatDate(nextDay)];
+            // આવતીકાલનો સૂર્યોદય: આવતીકાલની મધ્યરાત્રી + સૂર્યોદયનો સમય
+            const nextSunriseTime = nextData ? (dateOnlyMs + convertTimeToMs("24:00")) + convertTimeToMs(nextData.sunrise) : null;
+            
+            return { previousSunsetTime, currentSunriseTime, currentSunsetTime, nextSunriseTime };
+        }
+
+
+        function getChoghadiya(currentDate) {
+            const { previousSunsetTime, currentSunriseTime, currentSunsetTime, nextSunriseTime } = getSunTimestamps(currentDate);
+
+            // જો મુખ્ય ડેટા ઉપલબ્ધ ન હોય
+            if (!currentSunriseTime || !currentSunsetTime) {
+                return `ચોઘડિયાંનો ડેટા (તા: ${formatDate(currentDate)}) ઉપલબ્ધ નથી.`;
+            }
+
+            const now = currentDate.getTime();
+            const dayOfWeek = currentDate.getDay(); // 0 (રવિવાર) થી 6 (શનિવાર)
+            
+            // **૧. દિવસના ચોઘડિયાં (સૂર્યોદય થી સૂર્યાસ્ત)**
+            if (now >= currentSunriseTime && now < currentSunsetTime) {
+                const choghadiyaList = choghadiyaOrder[dayOfWeek].day; // આજનો વાર
+                const durationMs = (currentSunsetTime - currentSunriseTime) / 8;
+                const timeElapsed = now - currentSunriseTime;
                 const choghadiyaIndex = Math.floor(timeElapsed / durationMs);
                 
-                // આ લોજિક મધ્યરાત્રી પછી પણ ચાલશે કારણ કે nextSunriseTime આવતીકાલની તારીખે સેટ થયેલો છે.
-                return `રાતનું ચોઘડિયું: **${choghadiyaList[choghadiyaIndex]}**`;
+                const finalIndex = Math.min(choghadiyaIndex, 7); 
+                
+                return `દિવસનું ચોઘડિયું: **${choghadiyaList[finalIndex]}**`;
             }
-         
-            // ૩. રાતના ચોઘડિયાં - ભાગ-૨ (મધ્યરાત્રી ૦૦:૦૦ થી સૂર્યોદય)
-            if (now < sunriseTime) {
-                 if (!previousData || !nextSunriseTime) {
-                    return "રાતના ચોઘડિયાં (સૂર્યોદય પહેલાનો સમય) ગણવા માટે પૂરતો ડેટા ઉપલબ્ધ નથી.";
-                }
 
-                // રાતના ચોઘડિયાં માટે વાર 'આજનો' ગણાય છે, જે પાછલા દિવસના રાતના ચોઘડિયાંનો ભાગ છે.
-                const previousDayOfWeek = (dayOfWeek - 1 + 7) % 7; 
-                const choghadiyaList = choghadiyaOrder[dayOfWeek].night; // વાર આજનો પણ ક્રમ પાછલા દિવસના રાતનો લેવાનો
-
-                // પાછલા દિવસનો સૂર્યાસ્ત સમય
-                const previousDayOnly = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1).getTime();
-                const previousSunsetTime = previousDayOnly + convertTimeToMs(previousData.sunset);
-
-                // ગણતરીનો સમયગાળો: પાછલા દિવસના સૂર્યાસ્તથી આજના સૂર્યોદય સુધી.
-                const durationMs = (sunriseTime + convertTimeToMs("24:00") - previousSunsetTime) / 8;
-                const timeElapsed = now + convertTimeToMs("24:00") - previousSunsetTime;
-                
-                // આ ગણતરીમાં જટિલતાને કારણે, આ ભાગને સરળ રાખવા માટે 24-કલાકની ગણતરીનો ઉપયોગ કર્યો છે.
-                // નોંધ: આ ભાગને વધુ ડેટા (પ્રીવિયસ સૂર્યોદય/સૂર્યાસ્ત) સાથે વધુ ચોક્કસ કરી શકાય છે.
-                // હાલ પૂરતું, આ લોજિક ૦૦:૦૦ પછીનો સમય સંભાળશે.
-                let choghadiyaIndex = Math.floor(timeElapsed / durationMs);
-                
-                // Index 8 થી મોટો ન થાય તેની ખાતરી
-                if (choghadiyaIndex >= 8) {
-                    choghadiyaIndex = choghadiyaIndex % 8; 
-                }
-                
-                return `રાતનું ચોઘડિયું (સૂર્યોદય પહેલા): **${choghadiyaList[choghadiyaIndex]}**`;
-            }
+            // **૨. રાતના ચોઘડિયાં (સૂર્યાસ્ત થી બીજા દિવસના સૂર્યોદય)**
             
-            return "સમયની ગણતરી અશક્ય"; // Fallback
+            // જો રાતના ચોઘડિયાં માટેના બિંદુઓ ઉપલબ્ધ ન હોય
+            if (!previousSunsetTime || !nextSunriseTime) {
+                return "રાતના ચોઘડિયાં ગણવા માટે પૂરતો સૂર્યોદય/સૂર્યાસ્ત ડેટા ઉપલબ્ધ નથી.";
+            }
+
+            let nightStart, nightEnd, nightDayOfWeek;
+            
+            if (now >= currentSunsetTime) {
+                // A. સૂર્યાસ્ત પછી (આજની તારીખે, મધ્યરાત્રી પહેલા)
+                // રાતનો વાર: આજનો વાર (તમારા નિયમ મુજબ)
+                nightStart = currentSunsetTime;
+                nightEnd = nextSunriseTime; 
+                nightDayOfWeek = dayOfWeek; 
+                
+            } else {
+                // B. મધ્યરાત્રી પછી (આજની તારીખે, સૂર્યોદય પહેલા)
+                // રાતનો વાર: ગઈકાલનો વાર (જ્યાંથી રાત શરૂ થઈ હતી)
+                nightStart = previousSunsetTime;
+                nightEnd = currentSunriseTime; 
+                nightDayOfWeek = (dayOfWeek - 1 + 7) % 7; 
+            }
+
+            const choghadiyaList = choghadiyaOrder[nightDayOfWeek].night; 
+            
+            // રાતના સમયગાળાને 8 સમાન ભાગોમાં વિભાજિત કરવો
+            const durationMs = (nightEnd - nightStart) / 8;
+            
+            // nightStart થી હાલના સમય સુધીનો વીતેલો સમય
+            const timeElapsed = now - nightStart;
+
+            const choghadiyaIndex = Math.floor(timeElapsed / durationMs);
+            
+            // Index 8 થી મોટો ન થાય તેની ખાતરી
+            const finalIndex = Math.min(choghadiyaIndex, 7); 
+
+            const activeDay = dayNames[nightDayOfWeek];
+            
+            return `રાતનું ચોઘડિયું: **${choghadiyaList[finalIndex]}** (${activeDay} ની રાત)`;
         }
 
         // મુખ્ય ઘડિયાળ ફંક્શન
@@ -71,5 +197,4 @@
         updateClock();
     </script>
 </body>
-        </html>
-        
+</html>

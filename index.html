@@ -1,1 +1,223 @@
 
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ડિજિટલ ગુજરાતી ઘડિયાળ (API)</title>
+    <style>
+        /* CSS: (દેખાવ અગાઉ મુજબ જ છે) */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            background-color: #282c34;
+            color: #61dafb;
+        }
+        #clock-display {
+            font-size: 3em;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+        #ampm-time {
+            font-size: 1.5em;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        #gujarati-details {
+            font-size: 1.5em;
+            color: #b3ffb3;
+            border: 2px solid #61dafb;
+            padding: 15px;
+            display: inline-block;
+            border-radius: 10px;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        #slogan {
+            font-size: 1em;
+            margin-top: 30px;
+            color: #ccc;
+        }
+        .detail-line {
+            display: block;
+            font-weight: bold;
+        }
+        .birthday-text {
+            color: #ffcc00;
+            font-size: 1.1em;
+            font-weight: 900;
+        }
+        .loading-text {
+            color: #ff8c00;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="clock-display">00:00:00</div>
+    <div id="ampm-time">AM</div>
+    <div id="gujarati-details" class="loading-text">વિગતો લોડ થઈ રહી છે...</div>
+    <div id="slogan">Live in the present.</div>
+
+    <script>
+        /* JavaScript: API સાથે સંપૂર્ણ ઘડિયાળનો કોડ */
+
+        // **તમારી API કૂંચી અહીં દાખલ કરો**
+        const API_KEY = 'vuvGkR0XdQT4nXogXP7X7BNQKH4b1LV7yN0IX4qd'; 
+        
+        // **તમારું સ્થાન: લીંબડી, ગુજરાત**
+        const LATITUDE = 22.5833;
+        const LONGITUDE = 71.8500;
+        const TIMEZONE = 5.5; // IST
+
+        // **તમારી જન્મતારીખ (૨૩ સપ્ટેમ્બર)**
+        const USER_BIRTHDAY_DAY = 23; 
+        const USER_BIRTHDAY_MONTH = 8; // સપ્ટેમ્બર (JavaScript માં 0=જાન્યુઆરી, 8=સપ્ટેમ્બર)
+
+        // API માંથી પંચાંગની વિગતો મેળવતું ફંક્શન
+        async function fetchPanchangDetails(date) {
+            
+            // જો API Key ના હોય તો ભૂલ બતાવો
+            if (API_KEY === 'તમે મેળવેલી કૂંચી અહીં પેસ્ટ કરો') {
+                return '<span class="loading-text">⚠️ API કૂંચી (Key) ઉમેરો અને કોડને હોસ્ટ કરો.</span>';
+            }
+
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const seconds = date.getSeconds();
+
+            // API માટે URL અને Parameters (freeastrologyapi.com પર આધારિત ઉદાહરણ)
+            const apiUrl = `https://json.freeastrologyapi.com/complete-panchang`;
+            
+            const requestBody = {
+                year: year,
+                month: month,
+                date: day,
+                hours: hours,
+                minutes: minutes,
+                seconds: seconds,
+                latitude: LATITUDE,
+                longitude: LONGITUDE,
+                timezone: TIMEZONE,
+                config: {
+                    observation_point: "topocentric",
+                    ayanamsha: "lahiri"
+                }
+            };
+            
+            const headers = { 
+                'Content-Type': 'application/json', 
+                'x-api-key': API_KEY 
+            };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ભૂલ: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // API માંથી સચોટ વિગતો કાઢો (આ આઉટપુટ સ્ટ્રક્ચર પર આધારિત છે)
+                // નોંધ: તિથિ અને મહિનાના નામ અંગ્રેજીમાં આવી શકે છે, જેને આપણે ગુજરાતીમાં બદલીશું.
+                const tithiEn = data.tithi.details.tithi_name_en || "N/A";
+                const gujMonthEn = data.hindu_maah.amanta || "N/A";
+
+                const tithiGuj = convertToGujaratiTithi(tithiEn);
+                const gujMonthGuj = convertToGujaratiMonth(gujMonthEn);
+
+                // ચોઘડિયાં માટે, આ API માંથી સીધો ડેટા ઉપલબ્ધ ન હોય, 
+                // તેથી આપણે પ્લેસહોલ્ડર/અથવા બીજા કોલનો ઉપયોગ કરીશું.
+                const choghadiya = "સચોટ ચોઘડિયું લોડ થશે"; 
+                
+                // વારનું નામ (આપણે લોકલ ડેટમાંથી લઈશું)
+                const days = ['રવિવાર', 'સોમવાર', 'મંગળવાર', 'બુધવાર', 'ગુરુવાર', 'શુક્રવાર', 'શનિવાર'];
+                const dayName = days[date.getDay()];
+                
+                // જન્મદિવસની તપાસ (ગુજરાતીમાં)
+                let festival;
+                if (date.getDate() === USER_BIRTHDAY_DAY && date.getMonth() === USER_BIRTHDAY_MONTH) {
+                    festival = `<span class="birthday-text">જન્મદિવસ મુબારક! 🎉</span>`;
+                } else {
+                    festival = "કોઈ તહેવાર/પ્રસંગ નહીં"; 
+                }
+
+                return `
+                    <span class="detail-line">🗓️ વાર: **${dayName}** | તારીખ: **${day}/${month}/${year}**</span>
+                    <span class="detail-line">✨ તિથિ: **${tithiGuj}** | મહિનો: **${gujMonthGuj}**</span>
+                    <span class="detail-line">🔔 ચોઘડિયું: **${choghadiya}** | પ્રસંગ: **${festival}**</span>
+                `;
+
+            } catch (error) {
+                console.error("API માં ભૂલ:", error);
+                return `<span class="loading-text">API ભૂલ: ${error.message}. કૂંચી અને હોસ્ટિંગ તપાસો.</span>`;
+            }
+        }
+        
+        // અંગ્રેજી મહિનાના નામને ગુજરાતીમાં રૂપાંતરિત કરવા માટે (સામાન્ય રીતે ઉપયોગમાં લેવાતા નામો)
+        function convertToGujaratiMonth(enMonth) {
+            const map = {
+                'Kartik': 'કાર્તક', 'Margashirsha': 'માગશર', 'Pausha': 'પોષ', 'Magha': 'મહા', 
+                'Phalguna': 'ફાગણ', 'Chaitra': 'ચૈત્ર', 'Vaishakha': 'વૈશાખ', 'Jyeshtha': 'જેઠ', 
+                'Ashadha': 'અષાઢ', 'Shravana': 'શ્રાવણ', 'Bhadrapada': 'ભાદરવો', 'Ashwin': 'આસો',
+                'Amanta': 'અમાસ-અંત', 'Purnimanta': 'પૂનમ-અંત'
+            };
+            return map[enMonth] || enMonth;
+        }
+
+        // તિથિના નામને ગુજરાતીમાં રૂપાંતરિત કરવા માટે (અંદાજિત)
+        function convertToGujaratiTithi(enTithi) {
+            // અહીં સંપૂર્ણ મેપિંગ જટિલ છે, તેથી આપણે માત્ર અંગ્રેજી નામ બતાવીશું 
+            // અથવા માત્ર અમુક સામાન્ય નામોનું રૂપાંતર કરીશું
+            return enTithi.replace('Shukla', 'શુક્લ').replace('Krishna', 'કૃષ્ણ').replace('Pratipada', 'પડવો');
+        }
+
+        // મુખ્ય સમય અપડેટ ફંક્શન
+        let lastDay = -1; // API કોલ દિવસમાં માત્ર એક જ વાર થાય તે માટે
+
+        async function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            
+            // સમય ફોર્મેટિંગ...
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('clock-display').textContent = timeString;
+            document.getElementById('ampm-time').textContent = ampm;
+
+            // API કોલ: દર કલાકે અથવા જ્યારે દિવસ બદલાય ત્યારે
+            if (now.getDate() !== lastDay || (minutes === 0 && seconds === 0)) { 
+                 document.getElementById('gujarati-details').innerHTML = '<span class="loading-text">નવી વિગતો લોડ થઈ રહી છે...</span>';
+                 
+                 const gujaratiDetails = await fetchPanchangDetails(now);
+                 document.getElementById('gujarati-details').innerHTML = gujaratiDetails;
+                 
+                 lastDay = now.getDate();
+            }
+
+            // દર એક સેકન્ડે અપડેટ કરવા માટે
+            setTimeout(updateTime, 1000);
+        }
+
+        // ઘડિયાળ શરૂ કરો
+        updateTime();
+    </script>
+</body>
+</html>

@@ -1,15 +1,35 @@
-const gujaratiPanchangVS2082_SAFE = [
-  {
-    "date": "2025-11-01",
-    "day_g": "\u0ab6\u0aa8\u0abf\u0ab5\u0abe\u0ab0", // શનિવાર
-    "sunrise": "06:45",
-    "sunset": "17:59",
-    "month_g": "\u0a95\u0abe\u0ab0\u0aa4\u0a95", // કારતક
-    "paksha_g": "\u0ab8\u0ac1\u0aa6", // સુદ
-    "tithi_g": "\u0a8f\u0a95\u0aae", // એકમ
-    "festival_g": "\u0aa8\u0ac2\u0aa4\u0aa8 \u0ab5\u0ab0\u0acd\u0ab7 ( \u0aac\u0ac7\u0ab8\u0aa4\u0ac1\u0a82 \u0ab5\u0ab0\u0acd\u0ab7 )", // નૂતન વર્ષ (બેસતું વર્ષ)
-    "choghadiya_day": ["\u0a89\u0aa6\u0acd\u0ab5\u0ac7\u0a97", "\u0a9a\u0ab2", "\u0ab2\u0abe\u0aad", "\u0a85\u0aae\u0ac3\u0aa4", "\u0a95\u0abe\u0ab3", "\u0ab6\u0ac1\u0aad", "\u0ab0\u0acb\u0a97", "\u0a89\u0aa6\u0acd\u0ab5\u0ac7\u0a97"], // ઉદ્વેગ, ચલ, લાભ...
-    "choghadiya_night": ["\u0ab6\u0ac1\u0aad", "\u0a85\u0aae\u0ac3\u0aa4", "\u0a9a\u0ab2", "\u0ab0\u0acb\u0a97", "\u0a95\u0abe\u0ab3", "\u0ab2\u0abe\u0aad", "\u0a89\u0aa6\u0acd\u0ab5\u0ac7\u0a97", "\u0ab6\u0ac1\u0aad"]
-  }
-  // ... બાકીનો ડેટા આ ફોર્મેટમાં હશે.
-];
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ગુજરાતી ડિજિટલ ઘડિયાળ</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="clock-container">
+        <div id="slogan">"Live in the present"</div> 
+        
+        <div id="time" class="main-time">00:00:00</div>
+
+        <div id="date" class="secondary-info">તારીખ, વાર</div>
+        
+        <hr>
+
+        <div id="panchang-section">
+            <div id="gujarati-month" class="panchang-detail">મહિનો: --</div>
+            <div id="gujarati-tithi" class="panchang-detail">તિથિ: --</div>
+            <div id="choghadiya-time" class="panchang-detail">ચોઘડિયું સમયગાળો: --</div>
+            <div id="choghadiya-name" class="main-choghadiya">ચોઘડિયું: --</div>
+        </div>
+
+        <hr>
+
+        <div id="festival" class="festival-info">તહેવાર/પ્રસંગ: --</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

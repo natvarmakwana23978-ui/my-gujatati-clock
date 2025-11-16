@@ -596,6 +596,18 @@ function updateClock() {
     const panchangDetails = findPanchangDetails(now); 
     const choghadiya = calculateChoghadiya(now); 
 
+// ... તમારો ગણતરીનો કોડ અહીં છે
+
+// 🚨 અહીં નીચેની લીટીઓ ઉમેરો
+console.log("Panchang Details:", panchangDetails);
+console.log("Choghadiya Object:", choghadiya);
+// 🚨 અહીં સુધી
+
+// HTML માં અપડેટ
+document.getElementById('gujarati-month').textContent = `ગુજરાતી મહિનો: ${panchangDetails.month}`;
+// ... બાકીનો કોડ
+    
+    
     // HTML માં અપડેટ
     document.getElementById('gujarati-month').textContent = `ગુજરાતી મહિનો: ${panchangDetails.month}`;
     document.getElementById('gujarati-tithi').textContent = `તિથિ: ${panchangDetails.tithi}`;

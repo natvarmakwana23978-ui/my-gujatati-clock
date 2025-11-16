@@ -7,11 +7,11 @@ const GUJARATI_MONTHS = ['કાર્તિક', 'માગશર', 'પોષ'
 // મહિનાનો ક્રમ: કાર્તિક (0) થી આસો (12)
 
 function replaceDigits(inputString) {
-    return inputString.replace(/[0-9]/g, (digit) => GUJARATI_DIGITS[parseInt(digit)]);
+    return inputString.toString().replace(/[0-9]/g, (digit) => GUJARATI_DIGITS[parseInt(digit)]);
 }
 
 // =======================================================
-// (2) ચોઘડિયા માટેનો ડેટા (સિન્ટેક્સ એરર સુધારેલ)
+// (2) ચોઘડિયા માટેનો ડેટા (દિવસ: 0=રવિવાર, 6=શનિવાર)
 // =======================================================
 const choghadiya_data = {
     0: { દિવસ: ['ઉદવેગ', 'ચલ', 'લાભ', 'અમૃત', 'કાલ', 'શુભ', 'રોગ', 'ઉદવેગ'], રાત્રિ: ['શુભ', 'અમૃત', 'ચલ', 'રોગ', 'કાલ', 'લાભ', 'ઉદવેગ', 'શુભ'] }, 
@@ -24,9 +24,11 @@ const choghadiya_data = {
 };
 
 // =======================================================
-// (3) પંચાંગ ડેટા ટેબલ (સિન્ટેક્સ એરર સુધારેલ)
+// (3) પંચાંગ ડેટા ટેબલ (તમારા ડેટામાં મહિનાનો ઇન્ડેક્સ ઉમેરેલ)
 // =======================================================
-const PANCHANG_CALENDAR = {
+
+// તમારા ડેટાને JS ઑબ્જેક્ટ તરીકે પુનઃનિર્માણ કરીએ
+const RAW_PANCHANG_CALENDAR = {
     '22/10/2025': { tithi: 'સુદ - ૧', festival: 'બેસતુ વર્ષ', sunrise: '06:47:00', sunset: '18:05:00' },
     '23/10/2025': { tithi: 'સુદ - ર', festival: '--', sunrise: '06:47:00', sunset: '18:05:00' },
     '24/10/2025': { tithi: 'સુદ - ૩', festival: '--', sunrise: '06:47:00', sunset: '18:05:00' },
@@ -56,7 +58,7 @@ const PANCHANG_CALENDAR = {
     '17/11/2025': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '06:56:00', sunset: '17:58:00' },
     '18/11/2025': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '06:57:00', sunset: '17:58:00' },
     '19/11/2025': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '06:58:00', sunset: '17:58:00' },
-    '20/11/2025': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '06:58:00', sunset: '17:57:00' }, // **મહિનો અહીં પૂરો થાય છે (કાર્તિક)**
+    '20/11/2025': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '06:58:00', sunset: '17:57:00' }, 
     '21/11/2025': { tithi: 'સુદ - ૧', festival: '--', sunrise: '06:59:00', sunset: '17:57:00' },
     '22/11/2025': { tithi: 'સુદ - ર', festival: '--', sunrise: '07:00:00', sunset: '17:57:00' },
     '23/11/2025': { tithi: 'સુદ - ૩', festival: '--', sunrise: '07:00:00', sunset: '17:57:00' },
@@ -85,7 +87,7 @@ const PANCHANG_CALENDAR = {
     '16/12/2025': { tithi: 'વદ - ૧૨', festival: '--', sunrise: '07:15:00', sunset: '18:01:00' },
     '17/12/2025': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '07:16:00', sunset: '18:01:00' },
     '18/12/2025': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '07:16:00', sunset: '18:02:00' },
-    '19/12/2025': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '07:17:00', sunset: '18:02:00' }, // **મહિનો અહીં પૂરો થાય છે (માગશર)**
+    '19/12/2025': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '07:17:00', sunset: '18:02:00' }, 
     '20/12/2025': { tithi: 'સુદ - ૧', festival: '--', sunrise: '07:17:00', sunset: '18:02:00' },
     '21/12/2025': { tithi: 'સુદ - ૧', festival: '--', sunrise: '07:18:00', sunset: '18:03:00' },
     '22/12/2025': { tithi: 'સુદ - ૨', festival: '--', sunrise: '07:18:00', sunset: '18:03:00' },
@@ -115,7 +117,7 @@ const PANCHANG_CALENDAR = {
     '15/01/2026': { tithi: 'વદ - ૧૨', festival: '--', sunrise: '07:25:00', sunset: '18:19:00' },
     '16/01/2026': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '07:25:00', sunset: '18:19:00' },
     '17/01/2026': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '07:25:00', sunset: '18:20:00' },
-    '18/01/2026': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '07:24:00', sunset: '18:21:00' }, // **મહિનો અહીં પૂરો થાય છે (પોષ)**
+    '18/01/2026': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '07:24:00', sunset: '18:21:00' }, 
     '19/01/2026': { tithi: 'સુદ - ૧', festival: '--', sunrise: '07:24:00', sunset: '18:22:00' },
     '20/01/2026': { tithi: 'સુદ - ર', festival: '--', sunrise: '07:24:00', sunset: '18:22:00' },
     '21/01/2026': { tithi: 'સુદ - ૩', festival: '--', sunrise: '07:24:00', sunset: '18:23:00' },
@@ -145,7 +147,7 @@ const PANCHANG_CALENDAR = {
     '14/02/2026': { tithi: 'વદ - ૧૨', festival: '--', sunrise: '07:15:00', sunset: '18:38:00' },
     '15/02/2026': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '07:14:00', sunset: '18:39:00' },
     '16/02/2026': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '07:14:00', sunset: '18:39:00' },
-    '17/02/2026': { tithi: 'વદ - ૩૦', festival: '--', sunrise: '07:13:00', sunset: '18:40:00' }, 
+    '17/02/2026': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '07:13:00', sunset: '18:40:00' }, 
     '18/02/2026': { tithi: 'સુદ - ૧', festival: '--', sunrise: '07:12:00', sunset: '18:40:00' },
     '19/02/2026': { tithi: 'સુદ - ર', festival: '--', sunrise: '07:11:00', sunset: '18:41:00' },
     '20/02/2026': { tithi: 'સુદ - ૩', festival: '--', sunrise: '07:11:00', sunset: '18:41:00' },
@@ -175,7 +177,7 @@ const PANCHANG_CALENDAR = {
     '16/03/2026': { tithi: 'વદ - ૧૨', festival: '--', sunrise: '06:50:00', sunset: '18:52:00' },
     '17/03/2026': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '06:49:00', sunset: '18:52:00' },
     '18/03/2026': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '06:48:00', sunset: '18:53:00' },
-    '19/03/2026': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '06:48:00', sunset: '18:53:00' }, // **મહિનો અહીં પૂરો થાય છે (ફાગણ)**
+    '19/03/2026': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '06:48:00', sunset: '18:53:00' }, 
     '20/03/2026': { tithi: 'સુદ - ૨', festival: '--', sunrise: '06:47:00', sunset: '18:53:00' },
     '21/03/2026': { tithi: 'સુદ - ૩', festival: '--', sunrise: '06:46:00', sunset: '18:54:00' },
     '22/03/2026': { tithi: 'સુદ - ૪', festival: '--', sunrise: '06:45:00', sunset: '18:54:00' },
@@ -203,96 +205,203 @@ const PANCHANG_CALENDAR = {
     '13/04/2026': { tithi: 'વદ - ૧૧', festival: 'અગિયારસ', sunrise: '06:24:00', sunset: '19:02:00' },
     '14/04/2026': { tithi: 'વદ - ૧૨', festival: '--', sunrise: '06:23:00', sunset: '19:02:00' },
     '15/04/2026': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '06:22:00', sunset: '19:03:00' },
-    '16/04/2026': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '06:21:00', sunset: '19:03:00' } // <- ભૂલ સુધારેલ અને ડેટા પૂર્ણ
-}; // <- PANCHANG_CALENDAR ઓબ્જેક્ટ બંધ
+    '16/04/2026': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '06:21:00', sunset: '19:03:00' }
+};
 
 // =======================================================
-// (4) પંચાંગ વિગતો શોધવાનું ફંક્શન (નવું ઉમેરેલ)
+// (4) ગુજરાતી મહિનાનો ઇન્ડેક્સ ઉમેરવા માટેનું નવું ફંક્શન
+// =======================================================
+const PANCHANG_CALENDAR = (() => {
+    let currentMonthIndex = 0; // કાર્તિક (0) થી શરૂ
+    let isNewMonth = true;
+    let newCalendar = {};
+
+    for (const dateKey in RAW_PANCHANG_CALENDAR) {
+        let details = RAW_PANCHANG_CALENDAR[dateKey];
+        
+        // ઑટોમૅટિક મહિનાનો ઇન્ડેક્સ સેટ કરો
+        details.monthIndex = currentMonthIndex;
+
+        newCalendar[dateKey] = details;
+
+        // જો 'અમાસ' હોય, તો તે દિવસે મહિનો પૂરો થાય છે.
+        if (details.festival === 'અમાસ') {
+            // આવતીકાલથી નવો મહિનો શરૂ થશે
+            currentMonthIndex = (currentMonthIndex + 1) % GUJARATI_MONTHS.length;
+        }
+    }
+    return newCalendar;
+})();
+
+
+// =======================================================
+// (5) પંચાંગ વિગતો શોધવાનું ફંક્શન
 // =======================================================
 function findPanchangDetails(now) {
     const date = now.getDate();
     const month = now.getMonth() + 1; 
     const year = now.getFullYear();
-
-    // તારીખને PANCHANG_CALENDAR કી (Key) ફોર્મેટમાં બનાવો (દા.ત., 16/11/2025)
     const todayDateKey = `${String(date).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
 
     let details = PANCHANG_CALENDAR[todayDateKey];
 
-    // જો ડેટા ન મળે તો ડિફોલ્ટ વેલ્યુ આપો, જેથી TypeError ન આવે
     if (!details) {
-        details = { tithi: 'ડેટા નથી', festival: '--', sunrise: '06:00:00', sunset: '18:00:00' };
+        details = { tithi: 'ડેટા નથી', festival: '--', sunrise: '06:00:00', sunset: '18:00:00', monthIndex: 0 };
     }
     
-    // હાલમાં સરળતા માટે: મહિનાના નામ માટે PANCHANG_CALENDAR માંથી તિથિના આધારે લોજિક લખવું પડશે.
-    // તમારા ડેટા મુજબ, 16/11/2025 એ કાર્તિક મહિનામાં આવે છે.
-    let gujaratiMonthIndex = 0; // ડિફોલ્ટ: કાર્તિક
-    
-    // ***નોંધ: મહિનાની ગણતરી માટે તમારે જટિલ લોજિક લખવાની જરૂર છે.***
-    // હાલમાં, માત્ર દેખાવ માટે એક ડિફોલ્ટ આપી રહ્યા છીએ, જેનો તમે પછી સુધારો કરી શકો.
-    
-    details.month = GUJARATI_MONTHS[gujaratiMonthIndex]; 
+    details.month = GUJARATI_MONTHS[details.monthIndex]; 
 
     return details;
 }
 
 // =======================================================
-// (5) ચોઘડિયાની ગણતરીનું ફંક્શન (નવું ઉમેરેલ)
+// (6) ચોઘડિયા ગણતરી ફંક્શન (મધરાત પછીના લોજિક સાથે અપડેટ કરેલ)
 // =======================================================
-function calculateChoghadiya(now) {
-    // અહીં ચોઘડિયાની ગણતરી માટેનો સંપૂર્ણ લોજિક કોડ ઉમેરવો જરૂરી છે.
+function calculateChoghadiya(now, todayDetails) {
     
-    // હાલમાં, માત્ર દેખાવ માટે ડિફોલ્ટ વેલ્યુ પરત કરીએ, જેથી Error ન આવે
-    return { name: 'અમૃત', timeRange: 'ચોઘડિયા ગણતરી બાકી' }; 
+    // ગઈકાલની તારીખ મેળવો
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayDateKey = `${String(yesterday.getDate()).padStart(2, '0')}/${String(yesterday.getMonth() + 1).padStart(2, '0')}/${yesterday.getFullYear()}`;
+    const yesterdayDetails = PANCHANG_CALENDAR[yesterdayDateKey] || todayDetails; // જો ગઈકાલનો ડેટા ન હોય તો આજનો ડેટા વાપરો
+    
+    // આવતીકાલની તારીખ મેળવો
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDateKey = `${String(tomorrow.getDate()).padStart(2, '0')}/${String(tomorrow.getMonth() + 1).padStart(2, '0')}/${tomorrow.getFullYear()}`;
+    const tomorrowDetails = PANCHANG_CALENDAR[tomorrowDateKey] || todayDetails; // જો આવતીકાલનો ડેટા ન હોય તો આજનો ડેટા વાપરો
+
+
+    // 1. સૂર્યોદય અને સૂર્યાસ્તના Date ઑબ્જેક્ટ બનાવો (સર્વર ટાઇમનો ઉપયોગ)
+    const createTime = (date, timeStr) => {
+        const [h, m, s] = timeStr.split(':').map(Number);
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m, s);
+    };
+
+    const todaySunrise = createTime(now, todayDetails.sunrise);
+    const todaySunset = createTime(now, todayDetails.sunset);
+    const tomorrowSunrise = createTime(tomorrow, tomorrowDetails.sunrise);
+    const yesterdaySunset = createTime(yesterday, yesterdayDetails.sunset);
+    
+    
+    let choghadiyaType;
+    let choghadiyaStartTime;
+    let duration; 
+    
+    // (A) દિવસના ચોઘડિયા (સૂર્યોદય થી સૂર્યાસ્ત)
+    if (now >= todaySunrise && now < todaySunset) {
+        choghadiyaType = 'દિવસ';
+        choghadiyaStartTime = todaySunrise;
+        duration = todaySunset.getTime() - todaySunrise.getTime();
+    } 
+    // (B) રાત્રિના ચોઘડિયા (મધરાત પછી - સૂર્યોદય પહેલાં)
+    else if (now >= createTime(now, '00:00:00') && now < todaySunrise) {
+        // ગણતરી ગઈકાલના સૂર્યાસ્તથી આજના સૂર્યોદય સુધીની
+        choghadiyaType = 'રાત્રિ';
+        choghadiyaStartTime = yesterdaySunset;
+        duration = todaySunrise.getTime() - yesterdaySunset.getTime();
+    }
+    // (C) રાત્રિના ચોઘડિયા (સૂર્યાસ્ત પછી - મધરાત પહેલાં)
+    else { // now >= todaySunset && now < tomorrowSunrise
+        choghadiyaType = 'રાત્રિ';
+        choghadiyaStartTime = todaySunset;
+        duration = tomorrowSunrise.getTime() - todaySunset.getTime();
+    }
+    
+    const oneChoghadiyaDurationMs = duration / 8;
+    
+    // 2. હાલનો સમય કયા ચોઘડિયામાં આવે છે તે નક્કી કરો
+    let timeSinceStartMs = now.getTime() - choghadiyaStartTime.getTime();
+    
+    // જો `timeSinceStartMs` નેગેટિવ આવે (ગઈકાલના સૂર્યાસ્તથી ગણતરીમાં), તો 24 કલાક ઉમેરો.
+    // આ લોજિક (B) કેસ માટે છે, જ્યાં now < todaySunrise અને choghadiyaStartTime ગઈકાલનું છે.
+    if (timeSinceStartMs < 0) {
+        timeSinceStartMs += 24 * 60 * 60 * 1000;
+    }
+    
+    let choghadiyaIndex = Math.floor(timeSinceStartMs / oneChoghadiyaDurationMs);
+    
+    if (choghadiyaIndex < 0 || choghadiyaIndex > 7) {
+        choghadiyaIndex = 0; // સુરક્ષિત ડિફોલ્ટ
+    }
+
+    const dayOfWeek = now.getDay(); // 0 (રવિવાર) થી 6 (શનિવાર)
+
+    const currentChoghadiyaName = choghadiya_data[dayOfWeek][choghadiyaType][choghadiyaIndex];
+    
+    const nextChoghadiyaIndex = (choghadiyaIndex + 1) % 8;
+    const nextChoghadiyaName = choghadiya_data[dayOfWeek][choghadiyaType][nextChoghadiyaIndex];
+
+    const currentChoghadiyaEndTime = new Date(choghadiyaStartTime.getTime() + (oneChoghadiyaDurationMs * (choghadiyaIndex + 1)));
+
+    return {
+        name: currentChoghadiyaName,
+        type: choghadiyaType,
+        endTime: currentChoghadiyaEndTime,
+        nextName: nextChoghadiyaName,
+        isDay: choghadiyaType === 'દિવસ',
+        debug: {
+            start: choghadiyaStartTime.toLocaleTimeString(),
+            end: currentChoghadiyaEndTime.toLocaleTimeString(),
+            duration: Math.round(oneChoghadiyaDurationMs / 60000) + ' min'
+        }
+    };
 }
 
+
 // =======================================================
-// (6) મુખ્ય અપડેટ ફંક્શન
+// (7) મુખ્ય ડિસ્પ્લે અપડેટ ફંક્શન
 // =======================================================
-function updateClock() {
+function updatePanchang() {
     const now = new Date();
     
-    // 1. સમય
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    let seconds = now.getSeconds();
+    // (A) પંચાંગ વિગતો મેળવો
+    const details = findPanchangDetails(now);
     
-    hours = String(hours).padStart(2, '0');
-    minutes = String(minutes).padStart(2, '0');
-    seconds = String(seconds).padStart(2, '0');
+    // (B) ચોઘડિયું ગણો
+    const choghadiya = calculateChoghadiya(now, details);
     
-    const gujaratiTimeString = replaceDigits(`${hours}:${minutes}:${seconds}`);
-    document.getElementById('time').textContent = gujaratiTimeString;
+    // ===================================================
+    // 💡 અહીં તમારે HTML/DOM એલિમેન્ટ્સને અપડેટ કરવાની જરૂર છે.
+    // નીચેના console.log સ્ટેટમેન્ટ્સને તમારા HTML Elements સાથે બદલવા પડશે.
+    // ===================================================
 
-    // 2. તારીખ અને વાર
-    const date = now.getDate();
-    const month = now.getMonth() + 1; 
-    const year = now.getFullYear();
-    const dayIndex = now.getDay();
+    // (C) સમય અને તારીખ વિગતો
+    const timeString = `${replaceDigits(now.getHours())}:${replaceDigits(now.getMinutes())}:${replaceDigits(now.getSeconds())}`;
+    const dateString = `${replaceDigits(now.getDate()).padStart(2, '૦')}/${replaceDigits(now.getMonth() + 1).padStart(2, '૦')}/${replaceDigits(now.getFullYear())}`;
+    const dayName = GUJARATI_DAYS[now.getDay()];
 
-    const gujaratiDateString = replaceDigits(`${date}/${month}/${year}`);
-    const dayString = GUJARATI_DAYS[dayIndex];
-    document.getElementById('date').textContent = `${gujaratiDateString}, ${dayString}`;
-
-    // 3. પંચાંગ અને ચોઘડિયાની ગણતરી
-    const panchangDetails = findPanchangDetails(now); 
-    const choghadiya = calculateChoghadiya(now); 
-
-    // HTML માં અપડેટ
-    document.getElementById('gujarati-month').textContent = `ગુજરાતી મહિનો: ${panchangDetails.month}`;
-    document.getElementById('gujarati-tithi').textContent = `તિથિ: ${panchangDetails.tithi}`;
-    document.getElementById('choghadiya-name').textContent = `ચોઘડિયું: ${choghadiya.name}`;
-    document.getElementById('choghadiya-time').textContent = `સમયગાળો: ${choghadiya.timeRange}`;
+    // console.log ને બદલે, આ વેલ્યૂઝને HTML માં સેટ કરો:
+    // document.getElementById('time').innerText = timeString;
+    // document.getElementById('date').innerText = dateString;
+    // document.getElementById('day').innerText = dayName;
     
-    // તહેવાર/પ્રસંગ (જન્મદિવસનો ડેટા પણ અહીં બતાવવામાં આવશે)
-    document.getElementById('festival').textContent = `તહેવાર/પ્રસંગ: ${panchangDetails.festival || '--'}`; 
+    // (D) પંચાંગ વિગતો
+    // document.getElementById('gujarati-month').innerText = details.month;
+    // document.getElementById('tithi').innerText = replaceDigits(details.tithi);
+    // document.getElementById('festival').innerText = details.festival;
     
-    // સૂત્ર અપડેટ કરો
-    document.getElementById('slogan').textContent = '"Live in the present"'; 
+    // (E) ચોઘડિયા વિગતો
+    // document.getElementById('choghadiyu').innerText = choghadiya.name;
+    // document.getElementById('choghadiya-details').innerText = `(${choghadiya.type} - સમાપ્તિ: ${replaceDigits(choghadiya.endTime.toLocaleTimeString())})`;
+
+    // કોન્સોલ આઉટપુટ (તપાસ માટે):
+    console.clear();
+    console.log("--- ⌚ ડિજિટલ ઘડિયાળ વિગતો ---");
+    console.log(`વર્તમાન સમય: ${timeString} (${dayName})`);
+    console.log(`તિથિ: ${details.tithi}`);
+    console.log(`મહિનો: ${details.month}`);
+    console.log(`તહેવાર: ${details.festival}`);
+    console.log("-------------------------------");
+    console.log(`✅ ચોઘડિયું: ${choghadiya.name} (${choghadiya.type})`);
+    console.log(`   શરૂઆત: ${choghadiya.debug.start}`);
+    console.log(`   સમાપ્તિ: ${choghadiya.debug.end}`);
+    console.log(`   સમયગાળો: ${choghadiya.debug.duration}`);
+    console.log("-------------------------------");
 }
 
-// દર એક સેકન્ડે અપડેટ કરો
-setInterval(updateClock, 1000);
+// ઘડિયાળ ચાલુ કરવા માટે, આને દર સેકન્ડે કોલ કરો
+// setInterval(updatePanchang, 1000); 
 
-// પેજ લોડ થતાં જ શરૂ કરો (ખાલી સ્ક્રીન ન દેખાય તે માટે)
-updateClock();
+// તાત્કાલિક ટેસ્ટ માટે એક વખત કોલ કરો
+// updatePanchang();

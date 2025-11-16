@@ -208,7 +208,8 @@ const PANCHANG_CALENDAR = {
     '13/04/2026': { tithi: 'વદ - ૧૧', festival: 'અગિયારસ', sunrise: '06:24:00', sunset: '19:02:00' },
     '14/04/2026': { tithi: 'વદ - ૧૨', festival: '--', sunrise: '06:23:00', sunset: '19:02:00' },
     '15/04/2026': { tithi: 'વદ - ૧૩', festival: '--', sunrise: '06:22:00', sunset: '19:03:00' },
-    '16/04/2026': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '06:21:00', sunset: '19:03:00' } //
+    '16/04/2026': { tithi: 'વદ - ૧૪', festival: '--', sunrise: '06:21:00', sunset: '19:03:00' } 
+};
     '17/04/2026': { tithi: 'વદ - ૩૦', festival: 'અમાસ', sunrise: '06:21:00', sunset: '19:03:00' }, // **મહિનો અહીં પૂરો થાય છે (ચૈત્ર)**
     '18/04/2026': { tithi: 'સુદ - ૧', festival: '--', sunrise: '06:20:00', sunset: '19:04:00' },
     '19/04/2026': { tithi: 'સુદ - ર', festival: '--', sunrise: '06:19:00', sunset: '19:04:00' },
